@@ -1,0 +1,17 @@
+{
+    "cSpell.words": [
+        "razorpay"
+    ],
+    "cSpell.ignoreWords": [
+        "allauth",
+        "collectstatic",
+        "dotenv",
+        "mvhado",
+        "mysite",
+        "runserver",
+        "rxdrsfnl",
+        "testuser",
+        "venv",
+        "virtualenv"
+    ]
+}

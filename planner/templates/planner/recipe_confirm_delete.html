@@ -1,0 +1,343 @@
+{% extends 'base_master.html' %}
+{% load static %}
+
+{% block content %}
+<div class="shade">
+  <main class="container">
+    <!-- Page Header with Warning -->
+    <div class="content-card text-center mb-4">
+      <div class="warning-icon mb-3">
+        <i class="fas fa-exclamation-triangle fa-4x text-danger"></i>
+      </div>
+      <h1 class="text-danger mb-3">
+        <i class="fas fa-trash-alt me-2"></i>Delete Recipe
+      </h1>
+      <p class="lead text-muted">
+        This action cannot be undone. Please review the recipe details below before confirming.
+      </p>
+    </div>
+
+    <!-- Delete Confirmation Form -->
+    <form method="post" action="" class="fade-in">
+      {% csrf_token %}
+
+      <!-- Recipe Preview Card -->
+      <div class="recipe-card border-danger mb-4">
+        <div class="row">
+          <!-- Recipe Image -->
+          <div class="col-md-4">
+            <div class="recipe-image-container">
+              {% if recipe.recipe_image %}
+                <img
+                  src="{{ recipe.recipe_image.url }}"
+                  alt="{{ recipe.recipe_name }}"
+                  class="img-fluid rounded shadow-sm recipe-preview-img"
+                />
+              {% else %}
+                <div class="no-image-placeholder">
+                  <i class="fas fa-utensils fa-3x text-muted"></i>
+                  <p class="text-muted mt-2">No Image</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Recipe Details -->
+          <div class="col-md-8">
+            <div class="recipe-details">
+              <!-- Recipe Name -->
+              <h2 class="recipe-title text-danger mb-3">
+                "{{ recipe.recipe_name }}"
+              </h2>
+
+              <!-- Quick Info Pills -->
+              <div class="recipe-pills mb-3">
+                <span class="badge bg-primary me-2">
+                  <i class="fas fa-calendar me-1"></i>
+                  {{ recipe.get_weekday_label }}
+                </span>
+                <span class="badge bg-info me-2">
+                  <i class="fas fa-clock me-1"></i>
+                  {{ recipe.get_meal_type_label }}
+                </span>
+                {% if recipe.prep_time %}
+                <span class="badge bg-warning me-2">
+                  <i class="fas fa-stopwatch me-1"></i>
+                  Prep: {{ recipe.prep_time }}
+                </span>
+                {% endif %}
+                {% if recipe.cook_time %}
+                <span class="badge bg-success me-2">
+                  <i class="fas fa-fire me-1"></i>
+                  Cook: {{ recipe.cook_time }}
+                </span>
+                {% endif %}
+                {% if recipe.servings %}
+                <span class="badge bg-secondary">
+                  <i class="fas fa-users me-1"></i>
+                  Serves: {{ recipe.servings }}
+                </span>
+                {% endif %}
+              </div>
+
+              <!-- Description -->
+              {% if recipe.recipe_description %}
+              <div class="mb-3">
+                <h5><i class="fas fa-align-left me-2 text-muted"></i>Description</h5>
+                <p class="text-muted">{{ recipe.recipe_description|truncatewords:30 }}</p>
+              </div>
+              {% endif %}
+
+              <!-- Ingredients Preview -->
+              {% if recipe.ingredients %}
+              <div class="mb-3">
+                <h5><i class="fas fa-list me-2 text-muted"></i>Ingredients</h5>
+                <p class="text-muted">{{ recipe.ingredients|truncatewords:20 }}</p>
+              </div>
+              {% endif %}
+
+              <!-- Preparation Steps Preview -->
+              {% if recipe.preparation_steps %}
+              <div class="mb-3">
+                <h5><i class="fas fa-tasks me-2 text-muted"></i>Preparation</h5>
+                <p class="text-muted">{{ recipe.preparation_steps|truncatewords:20 }}</p>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Message -->
+      <div class="content-card bg-light border-danger mb-4">
+        <div class="text-center">
+          <h4 class="text-danger mb-3">
+            <i class="fas fa-question-circle me-2"></i>
+            Are you absolutely sure?
+          </h4>
+          <p class="lead text-muted mb-0">
+            You are about to permanently delete 
+            <strong class="text-danger">"{{ recipe.recipe_name }}"</strong> 
+            from your meal plan. This recipe will be completely removed and cannot be recovered.
+          </p>
+        </div>
+      </div>
+
+      <!-- Detailed Recipe Information (Collapsible) -->
+      <div class="content-card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5><i class="fas fa-info-circle me-2"></i>Complete Recipe Details</h5>
+          <button 
+            class="btn btn-outline-secondary btn-sm" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#recipeDetails" 
+            aria-expanded="false"
+          >
+            <i class="fas fa-chevron-down me-1"></i>Show Details
+          </button>
+        </div>
+
+        <div class="collapse" id="recipeDetails">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <tbody>
+                <tr>
+                  <th width="20%"><i class="fas fa-calendar text-primary me-2"></i>Day</th>
+                  <td>{{ recipe.get_weekday_label }}</td>
+                </tr>
+                <tr>
+                  <th><i class="fas fa-clock text-info me-2"></i>Meal Time</th>
+                  <td>{{ recipe.get_meal_type_label }}</td>
+                </tr>
+                <tr>
+                  <th><i class="fas fa-signature text-dark me-2"></i>Recipe Name</th>
+                  <td><strong>{{ recipe.recipe_name }}</strong></td>
+                </tr>
+                {% if recipe.recipe_description %}
+                <tr>
+                  <th><i class="fas fa-align-left text-muted me-2"></i>Description</th>
+                  <td>{{ recipe.recipe_description }}</td>
+                </tr>
+                {% endif %}
+                {% if recipe.ingredients %}
+                <tr>
+                  <th><i class="fas fa-list text-success me-2"></i>Ingredients</th>
+                  <td>{{ recipe.ingredients }}</td>
+                </tr>
+                {% endif %}
+                {% if recipe.preparation_steps %}
+                <tr>
+                  <th><i class="fas fa-tasks text-warning me-2"></i>Preparation Steps</th>
+                  <td>{{ recipe.preparation_steps }}</td>
+                </tr>
+                {% endif %}
+                {% if recipe.prep_time %}
+                <tr>
+                  <th><i class="fas fa-stopwatch text-warning me-2"></i>Prep Time</th>
+                  <td>{{ recipe.prep_time }}</td>
+                </tr>
+                {% endif %}
+                {% if recipe.cook_time %}
+                <tr>
+                  <th><i class="fas fa-fire text-danger me-2"></i>Cook Time</th>
+                  <td>{{ recipe.cook_time }}</td>
+                </tr>
+                {% endif %}
+                {% if recipe.servings %}
+                <tr>
+                  <th><i class="fas fa-users text-secondary me-2"></i>Servings</th>
+                  <td>{{ recipe.servings }}</td>
+                </tr>
+                {% endif %}
+                {% if recipe.nutritional_info %}
+                <tr>
+                  <th><i class="fas fa-heartbeat text-danger me-2"></i>Nutritional Info</th>
+                  <td>{{ recipe.nutritional_info }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="content-card text-center">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+              <button type="submit" class="btn btn-danger btn-lg delete-btn">
+                <i class="fas fa-trash-alt me-2"></i>
+                Yes, Delete Forever
+              </button>
+              <a href="{% url 'planner:recipe_list' %}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>
+                Cancel & Go Back
+              </a>
+            </div>
+            
+            <!-- Additional Safety Message -->
+            <div class="mt-3">
+              <small class="text-muted">
+                <i class="fas fa-shield-alt me-1"></i>
+                Tip: You can always create a new recipe with similar details later
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+
+<!-- Additional CSS for this page -->
+<style>
+  .warning-icon {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .recipe-preview-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border: 3px solid #dc3545;
+  }
+
+  .no-image-placeholder {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border: 3px dashed #dc3545;
+    border-radius: 8px;
+  }
+
+  .recipe-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .recipe-pills .badge {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .delete-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .delete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+  }
+
+  .delete-btn:active {
+    transform: translateY(0);
+  }
+
+  .border-danger {
+    border: 2px solid #dc3545 !important;
+  }
+
+  .recipe-image-container {
+    position: relative;
+  }
+
+  .recipe-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .recipe-pills {
+      justify-content: center;
+    }
+    
+    .d-flex.gap-3 {
+      flex-direction: column;
+    }
+    
+    .btn-lg {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+
+  /* Table improvements */
+  .table th {
+    background-color: #f8f9fa;
+    border-top: none;
+    vertical-align: middle;
+  }
+
+  .table td {
+    vertical-align: middle;
+    word-wrap: break-word;
+    max-width: 300px;
+  }
+</style>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+{% endblock content %}

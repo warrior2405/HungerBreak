@@ -1,0 +1,238 @@
+{% extends 'base_master.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section with Background -->
+<div class="shade">
+  <section class="hero-section">
+    <div class="container">
+      <!-- Logo with Animation -->
+      <div class="fade-in">
+        <img
+          src="{% static 'planner/img/rmp.png' %}"
+          alt="Recipe Meal Planner Logo"
+          width="200"
+          class="mb-4 logo-img"
+        />
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="title fade-in">Recipe Meal Planner</h1>
+
+      <!-- Subtitle -->
+      <p class="subtitle fade-in">
+        If you love meal planning and staying organized, Plan to Eat was created just for you!
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="fade-in">
+        {% if not request.user.is_authenticated %}
+        <a
+          href="{% url 'account_signup' %}"
+          class="btn btn-primary btn-lg"
+          role="button"
+        >
+          Get Started
+        </a>
+        <a
+          href="{% url 'account_login' %}"
+          class="btn btn-outline-light btn-lg"
+          role="button"
+        >
+          Login
+        </a>
+        {% else %}
+        <a
+          href="{% url 'planner:recipe_list' %}"
+          class="btn btn-primary btn-lg"
+          role="button"
+        >
+          My Recipes
+        </a>
+        <a
+          href="{% url 'payment:donate' %}"
+          class="btn btn-warning btn-lg"
+          role="button"
+        >
+          Support Us
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Call-to-Action Text -->
+      <p class="mt-4 fade-in" style="opacity: 0.9; font-size: 1.1rem;">
+        Join thousands of meal planners who are already making life easier with our platform.
+      </p>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="container">
+    <!-- Features Section -->
+    <div class="row mt-5">
+      <div class="col-md-4 mb-4">
+        <div class="content-card text-center">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-utensils fa-3x text-primary"></i>
+          </div>
+          <h3 class="h4 mb-3">Plan Your Meals</h3>
+          <p class="text-muted">
+            Organize your weekly meals with our intuitive planning system. 
+            Never wonder "what's for dinner?" again.
+          </p>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        <div class="content-card text-center">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-list fa-3x text-success"></i>
+          </div>
+          <h3 class="h4 mb-3">Smart Grocery Lists</h3>
+          <p class="text-muted">
+            Automatically generate shopping lists based on your meal plans. 
+            Save time and reduce food waste.
+          </p>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4">
+        <div class="content-card text-center">
+          <div class="feature-icon mb-3">
+            <i class="fas fa-clock fa-3x text-info"></i>
+          </div>
+          <h3 class="h4 mb-3">Save Time</h3>
+          <p class="text-muted">
+            Streamline your cooking routine with pre-planned meals and 
+            organized recipes at your fingertips.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <!-- Quick Actions for Authenticated Users -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="content-card">
+          <h2 class="h3 mb-4 text-center">Quick Actions</h2>
+          <div class="row text-center">
+            <div class="col-md-3 mb-3">
+              <a href="{% url 'planner:recipe_create' %}" class="btn btn-outline-primary btn-lg w-100">
+                <i class="fas fa-plus-circle mb-2"></i><br>
+                Add Recipe
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="{% url 'planner:recipe_list' %}" class="btn btn-outline-success btn-lg w-100">
+                <i class="fas fa-list mb-2"></i><br>
+                View Recipes
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="{% url 'planner:admin_view' %}" class="btn btn-outline-info btn-lg w-100">
+                <i class="fas fa-calendar mb-2"></i><br>
+                Meal Plan
+              </a>
+            </div>
+            <div class="col-md-3 mb-3">
+              <a href="{% url 'payment:donate' %}" class="btn btn-outline-warning btn-lg w-100">
+                <i class="fas fa-heart mb-2"></i><br>
+                Support
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Testimonial or Stats Section -->
+    <div class="row mt-5 mb-5">
+      <div class="col-12">
+        <div class="content-card bg-gradient text-center">
+          <h2 class="h3 mb-4">Why Choose Recipe Meal Planner?</h2>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <h3 class="display-6 text-primary">5000+</h3>
+              <p class="lead">Happy Users</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h3 class="display-6 text-success">10,000+</h3>
+              <p class="lead">Recipes Planned</p>
+            </div>
+            <div class="col-md-4 mb-3">
+              <h3 class="display-6 text-info">50+</h3>
+              <p class="lead">Hours Saved Weekly</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Additional CSS for this page -->
+<style>
+  .hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-img {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+  }
+
+  .logo-img:hover {
+    transform: scale(1.05);
+  }
+
+  .feature-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .content-card:hover .feature-icon {
+    transform: translateY(-5px);
+  }
+
+  .bg-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .bg-gradient .display-6 {
+    color: white !important;
+  }
+
+  /* Animation delays for staggered effect */
+  .fade-in:nth-child(1) { animation-delay: 0.2s; }
+  .fade-in:nth-child(2) { animation-delay: 0.4s; }
+  .fade-in:nth-child(3) { animation-delay: 0.6s; }
+  .fade-in:nth-child(4) { animation-delay: 0.8s; }
+  .fade-in:nth-child(5) { animation-delay: 1s; }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .hero-section {
+      min-height: 90vh;
+      padding: 20px 0;
+    }
+    
+    .title {
+      font-size: 2.5rem;
+    }
+    
+    .btn-lg {
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+{% endblock content %}

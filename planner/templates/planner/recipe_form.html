@@ -1,0 +1,483 @@
+{% extends 'base_master.html' %}
+{% load bootstrap5 %}
+{% load static %}
+
+{% block title %}
+{% if form_type == 'Update' %}
+Update Recipe - {{ form.instance.recipe_name }}
+{% else %}
+Create New Recipe
+{% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="shade">
+  <main class="container">
+    <!-- Page Header -->
+    <div class="content-card text-center mb-4">
+      <div class="form-header-icon mb-3">
+        {% if form_type == 'Update' %}
+          <i class="fas fa-edit fa-3x text-warning"></i>
+        {% else %}
+          <i class="fas fa-plus-circle fa-3x text-success"></i>
+        {% endif %}
+      </div>
+      <h1 class="mb-3">
+        {% if form_type == 'Update' %}
+          <i class="fas fa-edit me-2"></i>Update Recipe
+        {% else %}
+          <i class="fas fa-plus me-2"></i>Create New Recipe
+        {% endif %}
+      </h1>
+      <p class="lead text-muted">
+        {% if form_type == 'Update' %}
+          Make changes to your existing recipe and keep your meal plan organized.
+        {% else %}
+          Add a delicious new recipe to your meal planning collection.
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Recipe Form -->
+    <div class="form-container">
+      <form method="post" enctype="multipart/form-data" class="recipe-form" id="recipeForm">
+        {% csrf_token %}
+        
+        <!-- Form Progress Indicator -->
+        <div class="form-progress mb-4">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <small class="text-muted mt-2 d-block text-center">
+            Fill out the form to see your progress
+          </small>
+        </div>
+
+        <!-- Basic Information Section -->
+        <div class="form-section fade-in">
+          <div class="section-header mb-4">
+            <h3><i class="fas fa-info-circle text-primary me-2"></i>Basic Information</h3>
+            <p class="text-muted">Start with the essentials of your recipe</p>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-group mb-3">
+                <label for="{{ form.recipe_name.id_for_label }}" class="form-label">
+                  <i class="fas fa-signature me-2"></i>Recipe Name
+                  <span class="text-danger">*</span>
+                </label>
+                {{ form.recipe_name }}
+                {% if form.recipe_name.help_text %}
+                  <small class="form-text text-muted">{{ form.recipe_name.help_text }}</small>
+                {% endif %}
+                {% if form.recipe_name.errors %}
+                  <div class="text-danger mt-1">{{ form.recipe_name.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group mb-3">
+                <label for="{{ form.servings.id_for_label }}" class="form-label">
+                  <i class="fas fa-users me-2"></i>Servings
+                </label>
+                {{ form.servings }}
+                {% if form.servings.errors %}
+                  <div class="text-danger mt-1">{{ form.servings.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="{{ form.recipe_description.id_for_label }}" class="form-label">
+              <i class="fas fa-align-left me-2"></i>Description
+            </label>
+            {{ form.recipe_description }}
+            {% if form.recipe_description.help_text %}
+              <small class="form-text text-muted">{{ form.recipe_description.help_text }}</small>
+            {% endif %}
+            {% if form.recipe_description.errors %}
+              <div class="text-danger mt-1">{{ form.recipe_description.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Scheduling Section -->
+        <div class="form-section fade-in">
+          <div class="section-header mb-4">
+            <h3><i class="fas fa-calendar text-info me-2"></i>Meal Planning</h3>
+            <p class="text-muted">When do you plan to make this recipe?</p>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label for="{{ form.day_of_the_week.id_for_label }}" class="form-label">
+                  <i class="fas fa-calendar-day me-2"></i>Day of the Week
+                  <span class="text-danger">*</span>
+                </label>
+                {{ form.day_of_the_week }}
+                {% if form.day_of_the_week.errors %}
+                  <div class="text-danger mt-1">{{ form.day_of_the_week.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label for="{{ form.meal_type.id_for_label }}" class="form-label">
+                  <i class="fas fa-clock me-2"></i>Meal Type
+                  <span class="text-danger">*</span>
+                </label>
+                {{ form.meal_type }}
+                {% if form.meal_type.errors %}
+                  <div class="text-danger mt-1">{{ form.meal_type.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingredients Section -->
+        <div class="form-section fade-in">
+          <div class="section-header mb-4">
+            <h3><i class="fas fa-list text-success me-2"></i>Ingredients</h3>
+            <p class="text-muted">List all the ingredients you'll need</p>
+          </div>
+          
+          <div class="form-group mb-3">
+            <label for="{{ form.ingredients.id_for_label }}" class="form-label">
+              <i class="fas fa-shopping-cart me-2"></i>Ingredients List
+            </label>
+            {{ form.ingredients }}
+            <small class="form-text text-muted">
+              <i class="fas fa-lightbulb me-1"></i>
+              Tip: List each ingredient on a new line with quantities (e.g., "2 cups flour")
+            </small>
+            {% if form.ingredients.errors %}
+              <div class="text-danger mt-1">{{ form.ingredients.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Instructions Section -->
+        <div class="form-section fade-in">
+          <div class="section-header mb-4">
+            <h3><i class="fas fa-tasks text-warning me-2"></i>Preparation</h3>
+            <p class="text-muted">Step-by-step cooking instructions</p>
+          </div>
+          
+          <div class="form-group mb-3">
+            <label for="{{ form.preparation_steps.id_for_label }}" class="form-label">
+              <i class="fas fa-list-ol me-2"></i>Preparation Steps
+            </label>
+            {{ form.preparation_steps }}
+            <small class="form-text text-muted">
+              <i class="fas fa-lightbulb me-1"></i>
+              Tip: Number your steps for easy following (e.g., "1. Preheat oven to 350°F")
+            </small>
+            {% if form.preparation_steps.errors %}
+              <div class="text-danger mt-1">{{ form.preparation_steps.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Timing Section -->
+        <div class="form-section fade-in">
+          <div class="section-header mb-4">
+            <h3><i class="fas fa-stopwatch text-primary me-2"></i>Timing</h3>
+            <p class="text-muted">How long does this recipe take?</p>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label for="{{ form.prep_time.id_for_label }}" class="form-label">
+                  <i class="fas fa-hourglass-start me-2"></i>Prep Time
+                </label>
+                {{ form.prep_time }}
+                <small class="form-text text-muted">Time to prepare ingredients (e.g., "30 minutes")</small>
+                {% if form.prep_time.errors %}
+                  <div class="text-danger mt-1">{{ form.prep_time.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-3">
+                <label for="{{ form.cook_time.id_for_label }}" class="form-label">
+                  <i class="fas fa-fire me-2"></i>Cook Time
+                </label>
+                {{ form.cook_time }}
+                <small class="form-text text-muted">Actual cooking time (e.g., "45 minutes")</small>
+                {% if form.cook_time.errors %}
+                  <div class="text-danger mt-1">{{ form.cook_time.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Info Section -->
+        <div class="form-section fade-in">
+          <div class="section-header mb-4">
+            <h3><i class="fas fa-plus-circle text-secondary me-2"></i>Additional Information</h3>
+            <p class="text-muted">Optional details to enhance your recipe</p>
+          </div>
+          
+          <div class="form-group mb-3">
+            <label for="{{ form.nutritional_info.id_for_label }}" class="form-label">
+              <i class="fas fa-heartbeat me-2"></i>Nutritional Information
+            </label>
+            {{ form.nutritional_info }}
+            <small class="form-text text-muted">
+              Optional: Add calories, nutrients, dietary restrictions, etc.
+            </small>
+            {% if form.nutritional_info.errors %}
+              <div class="text-danger mt-1">{{ form.nutritional_info.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group mb-4">
+            <label for="{{ form.recipe_image.id_for_label }}" class="form-label">
+              <i class="fas fa-image me-2"></i>Recipe Image
+            </label>
+            {{ form.recipe_image }}
+            <small class="form-text text-muted">
+              Upload a photo of your finished dish to make it more appealing!
+            </small>
+            {% if form.recipe_image.errors %}
+              <div class="text-danger mt-1">{{ form.recipe_image.errors }}</div>
+            {% endif %}
+            
+            <!-- Image Preview -->
+            <div id="imagePreview" class="mt-3" style="display: none;">
+              <img id="preview" src="#" alt="Recipe Preview" class="img-thumbnail" style="max-width: 200px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions text-center pt-4 border-top">
+          <div class="row justify-content-center">
+            <div class="col-md-8">
+              <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <button type="submit" class="btn btn-lg submit-btn">
+                  {% if form_type == 'Update' %}
+                    <i class="fas fa-save me-2"></i>Update Recipe
+                  {% else %}
+                    <i class="fas fa-plus me-2"></i>Create Recipe
+                  {% endif %}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-lg"
+                  onclick="window.location='{% url 'planner:recipe_list' %}'"
+                >
+                  <i class="fas fa-times me-2"></i>Cancel
+                </button>
+              </div>
+              
+              <!-- Form Tips -->
+              <div class="form-tips mt-4">
+                <small class="text-muted">
+                  <i class="fas fa-info-circle me-1"></i>
+                  <strong>Required fields are marked with *</strong> - 
+                  All other fields are optional but help make your recipe more complete!
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<!-- Additional CSS and JavaScript for enhanced functionality -->
+<style>
+  .form-header-icon {
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+
+  .form-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+  }
+
+  .form-section:nth-child(2) { border-left-color: #007bff; }
+  .form-section:nth-child(3) { border-left-color: #17a2b8; }
+  .form-section:nth-child(4) { border-left-color: #28a745; }
+  .form-section:nth-child(5) { border-left-color: #ffc107; }
+  .form-section:nth-child(6) { border-left-color: #6f42c1; }
+  .form-section:nth-child(7) { border-left-color: #6c757d; }
+
+  .section-header h3 {
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .form-progress {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 4px;
+  }
+
+  .submit-btn {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .submit-btn:hover {
+    background: linear-gradient(45deg, #218838, #1cc88a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    color: white;
+  }
+
+  .form-control {
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+  }
+
+  textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+  }
+
+  .form-tips {
+    background: rgba(255, 248, 220, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+  }
+
+  /* Animation delays */
+  .fade-in:nth-child(1) { animation-delay: 0.1s; }
+  .fade-in:nth-child(2) { animation-delay: 0.2s; }
+  .fade-in:nth-child(3) { animation-delay: 0.3s; }
+  .fade-in:nth-child(4) { animation-delay: 0.4s; }
+  .fade-in:nth-child(5) { animation-delay: 0.5s; }
+  .fade-in:nth-child(6) { animation-delay: 0.6s; }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .form-section {
+      padding: 20px 15px;
+    }
+    
+    .d-flex.gap-3 {
+      flex-direction: column;
+    }
+    
+    .btn-lg {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Form progress tracking
+  const form = document.getElementById('recipeForm');
+  const progressFill = document.getElementById('progressFill');
+  const requiredFields = form.querySelectorAll('input[required], select[required], textarea[required]');
+  
+  function updateProgress() {
+    let filledFields = 0;
+    requiredFields.forEach(field => {
+      if (field.value.trim() !== '') {
+        filledFields++;
+      }
+    });
+    
+    const progress = (filledFields / requiredFields.length) * 100;
+    progressFill.style.width = progress + '%';
+  }
+  
+  // Update progress on input
+  requiredFields.forEach(field => {
+    field.addEventListener('input', updateProgress);
+    field.addEventListener('change', updateProgress);
+  });
+  
+  // Initial progress update
+  updateProgress();
+  
+  // Image preview functionality
+  const imageInput = document.querySelector('input[type="file"]');
+  const imagePreview = document.getElementById('imagePreview');
+  const preview = document.getElementById('preview');
+  
+  if (imageInput) {
+    imageInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        imagePreview.style.display = 'none';
+      }
+    });
+  }
+  
+  // Form validation enhancement
+  form.addEventListener('submit', function(e) {
+    const submitBtn = form.querySelector('.submit-btn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+    submitBtn.disabled = true;
+  });
+});
+</script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+{% endblock content %}

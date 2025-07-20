@@ -1,0 +1,290 @@
+{% extends 'base_master.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-3">
+  <div class="row justify-content-between align-items-center">
+    <div class="col-md-6">
+      <h1 class="text-primary">{{request.user|capfirst}}'s Recipes</h1>
+    </div>
+    <div class="col-md-6 text-end">
+      {% if recipe_list %}
+      <button
+        type="button"
+        class="btn btn-primary btn-lg"
+        onclick="generatePdf('{{request.user}}')"
+        id="downloadBtn"
+      >
+        <i class="fas fa-download me-2"></i>Download PDF
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  <hr />
+
+  {% if recipe_list %}
+  <!-- PDF Content Container -->
+  <div class="recipe-container" id="pdfContent">
+    <div class="pdf-header text-center mb-4">
+      <h1 class="display-4 text-primary">Recipe Meal Planner</h1>
+      <p class="lead">
+        Meal Plan designed by 
+        {% if request.user.first_name and request.user.last_name %}
+          <strong class="text-primary">{{request.user.first_name|capfirst}} {{request.user.last_name|capfirst}}</strong>
+        {% else %}
+          <strong class="text-primary">{{request.user|capfirst}}</strong>
+        {% endif %}
+      </p>
+      <p class="text-muted">Generated on {% now "F j, Y" %}</p>
+    </div>
+
+    <!-- Recipe Cards Layout for Better PDF Generation -->
+    <div class="recipe-grid">
+      {% for recipe in recipe_list %}
+      <div class="recipe-card mb-4 p-4 border rounded shadow-sm">
+        <div class="row">
+          <div class="col-md-8">
+            <div class="recipe-header mb-3">
+              <h3 class="text-primary mb-1">{{recipe.recipe_name}}</h3>
+              <div class="recipe-meta">
+                <span class="badge bg-info me-2">{{recipe.get_weekday_label}}</span>
+                <span class="badge bg-secondary me-2">{{recipe.get_meal_type_label}}</span>
+                <span class="badge bg-success">{{recipe.servings}} servings</span>
+              </div>
+            </div>
+            
+            <div class="recipe-details">
+              <div class="mb-3">
+                <h6 class="fw-bold text-muted">Description</h6>
+                <p class="small">{{recipe.recipe_description}}</p>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <h6 class="fw-bold text-muted">Ingredients</h6>
+                  <div class="small">{{recipe.ingredients|linebreaks}}</div>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="fw-bold text-muted">Preparation Steps</h6>
+                  <div class="small">{{recipe.preparation_steps|linebreaks}}</div>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <h6 class="fw-bold text-muted">Prep Time</h6>
+                  <p class="small">{{recipe.prep_time}}</p>
+                </div>
+                <div class="col-md-4">
+                  <h6 class="fw-bold text-muted">Cook Time</h6>
+                  <p class="small">{{recipe.cook_time}}</p>
+                </div>
+                <div class="col-md-4">
+                  <h6 class="fw-bold text-muted">Total Time</h6>
+                  <p class="small">
+                    {% if recipe.prep_time and recipe.cook_time %}
+                      {{recipe.prep_time|add:recipe.cook_time}} mins
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </p>
+                </div>
+              </div>
+              
+              {% if recipe.nutritional_info %}
+              <div class="mb-3">
+                <h6 class="fw-bold text-muted">Nutritional Information</h6>
+                <div class="small">{{recipe.nutritional_info|linebreaks}}</div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="col-md-4 text-center">
+            {% if recipe.recipe_image %}
+            <img src="{{recipe.recipe_image.url}}" alt="{{recipe.recipe_name}}" 
+                 class="img-fluid rounded shadow-sm recipe-image" 
+                 style="max-height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="placeholder-image d-flex align-items-center justify-content-center bg-light rounded" 
+                 style="height: 200px;">
+              <i class="fas fa-utensils fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Table View (Alternative Layout) -->
+  <div class="d-none" id="tableView">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead class="table-primary">
+          <tr>
+            <th>Day</th>
+            <th>Time</th>
+            <th>Recipe Name</th>
+            <th>Description</th>
+            <th>Prep Time</th>
+            <th>Cook Time</th>
+            <th>Servings</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for recipe in recipe_list %}
+          <tr>
+            <td>{{recipe.get_weekday_label}}</td>
+            <td>{{recipe.get_meal_type_label}}</td>
+            <td><strong>{{recipe.recipe_name}}</strong></td>
+            <td class="small">{{recipe.recipe_description|truncatewords:10}}</td>
+            <td>{{recipe.prep_time}}</td>
+            <td>{{recipe.cook_time}}</td>
+            <td>{{recipe.servings}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="alert alert-info d-flex align-items-center" role="alert">
+    <i class="fas fa-info-circle me-2"></i>
+    <div>
+      <h5 class="alert-heading">No Recipes Found</h5>
+      <p class="mb-0">There are no recipes in your meal planner yet. 
+      <a href="{% url 'planner:recipe_create' %}" class="alert-link">Create your first recipe</a> to get started!</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Action Buttons -->
+  <div class="mt-4 d-flex gap-2">
+    <a class="btn btn-secondary" href="{% url 'planner:recipe_list' %}">
+      <i class="fas fa-arrow-left me-2"></i>Back to Recipes
+    </a>
+    {% if recipe_list %}
+    <button class="btn btn-outline-primary" onclick="toggleView()">
+      <i class="fas fa-table me-2"></i>Toggle Table View
+    </button>
+    <button class="btn btn-outline-success" onclick="printPage()">
+      <i class="fas fa-print me-2"></i>Print
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Custom Styles for PDF Generation -->
+<style>
+  @media print {
+    .btn, .d-print-none { display: none !important; }
+    .recipe-card { break-inside: avoid; }
+  }
+  
+  .recipe-image {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .recipe-card {
+    background: white;
+    border: 1px solid #dee2e6;
+  }
+  
+  .placeholder-image {
+    border: 2px dashed #dee2e6;
+  }
+  
+  /* PDF-specific styles */
+  .pdf-header {
+    page-break-after: avoid;
+  }
+  
+  .recipe-card {
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+
+<script>
+function generatePdf(username) {
+  const element = document.getElementById('pdfContent');
+  const downloadBtn = document.getElementById('downloadBtn');
+  
+  // Show loading state
+  downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...';
+  downloadBtn.disabled = true;
+  
+  const opt = {
+    margin: [0.5, 0.5, 0.5, 0.5],
+    filename: `${username}_recipe_meal_planner_${new Date().toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      scrollX: 0,
+      scrollY: 0
+    },
+    jsPDF: { 
+      unit: 'in', 
+      format: 'a4', 
+      orientation: 'portrait',
+      putOnlyUsedFonts: true
+    },
+    pagebreak: { mode: 'avoid-all' }
+  };
+
+  html2pdf()
+    .set(opt)
+    .from(element)
+    .save()
+    .then(() => {
+      // Reset button state
+      downloadBtn.innerHTML = '<i class="fas fa-download me-2"></i>Download PDF';
+      downloadBtn.disabled = false;
+    })
+    .catch((error) => {
+      console.error('PDF generation failed:', error);
+      downloadBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>PDF Failed';
+      downloadBtn.disabled = false;
+      setTimeout(() => {
+        downloadBtn.innerHTML = '<i class="fas fa-download me-2"></i>Download PDF';
+      }, 3000);
+    });
+}
+
+function toggleView() {
+  const cardView = document.getElementById('pdfContent');
+  const tableView = document.getElementById('tableView');
+  
+  if (cardView.classList.contains('d-none')) {
+    cardView.classList.remove('d-none');
+    tableView.classList.add('d-none');
+  } else {
+    cardView.classList.add('d-none');
+    tableView.classList.remove('d-none');
+  }
+}
+
+function printPage() {
+  window.print();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'p') {
+    e.preventDefault();
+    generatePdf('{{request.user}}');
+  }
+});
+</script>
+
+{% endblock content %}

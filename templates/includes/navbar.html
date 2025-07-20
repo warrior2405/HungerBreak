@@ -1,0 +1,337 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="navbar" aria-label="Recipe Meal Planner Navigation">
+  <div class="container-fluid">
+    <!-- Brand -->
+    <a class="navbar-brand d-flex align-items-center" href="{% url 'planner:index' %}">
+      <img 
+        src="{% static 'planner/img/rmp.png' %}" 
+        alt="Recipe Meal Planner Logo" 
+        width="32" 
+        height="32"
+        class="d-inline-block me-2" 
+      />
+      <span class="fw-bold">Recipe Meal Planner</span>
+    </a>
+
+    <!-- Toggler -->
+    <button 
+      class="navbar-toggler" 
+      type="button" 
+      data-bs-toggle="collapse" 
+      data-bs-target="#navbarNav" 
+      aria-controls="navbarNav" 
+      aria-expanded="false" 
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar content -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Left Navigation Links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if request.user.is_authenticated %}
+          <li class="nav-item">
+            {% if request.user.is_superuser %}
+              <a class="nav-link" href="{% url 'planner:admin_view' %}" aria-current="page">
+                <i class="fas fa-home me-1"></i>Dashboard
+              </a>
+            {% else %}
+              <a class="nav-link" href="{% url 'planner:recipe_list' %}" aria-current="page">
+                <i class="fas fa-home me-1"></i>My Recipes
+              </a>
+            {% endif %}
+          </li>
+          {% if not request.user.is_superuser %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'planner:recipe_create' %}">
+                <i class="fas fa-plus me-1"></i>Add Recipe
+              </a>
+            </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'planner:user_update' request.user.id %}">
+              <i class="fas fa-user me-1"></i>Profile
+            </a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'planner:index' %}">
+              <i class="fas fa-home me-1"></i>Home
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+
+      <!-- Right side buttons -->
+      <ul class="navbar-nav mb-2 mb-lg-0 d-flex align-items-center">
+        <!-- User greeting -->
+        {% if request.user.is_authenticated %}
+          <li class="nav-item me-3">
+            <span class="navbar-text text-light">
+              <i class="fas fa-user-circle me-1"></i>
+              Hello, {{ request.user.first_name|default:request.user.username }}!
+            </span>
+          </li>
+        {% endif %}
+
+        <!-- Theme Toggle Button -->
+        <li class="nav-item me-2">
+          <button 
+            id="themeToggle" 
+            class="btn btn-outline-light btn-sm d-flex align-items-center" 
+            type="button"
+            onclick="toggleTheme()"
+            aria-label="Toggle theme"
+            title="Toggle light/dark theme"
+          >
+            <i id="themeIcon" class="fas fa-moon"></i>
+          </button>
+        </li>
+
+        <!-- Support/Donate Button (for authenticated users) -->
+        {% if request.user.is_authenticated %}
+          <li class="nav-item me-2">
+            <a class="btn btn-outline-warning btn-sm" href="{% url 'payment:donate' %}" title="Support Us">
+              <i class="fas fa-heart me-1"></i>Support
+            </a>
+          </li>
+        {% endif %}
+
+        <!-- Auth Buttons -->
+        <li class="nav-item">
+          {% if request.user.is_authenticated %}
+            <a class="btn btn-danger btn-sm" href="{% url 'account_logout' %}">
+              <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+          {% else %}
+            <div class="btn-group" role="group" aria-label="Authentication">
+              <a class="btn btn-outline-light btn-sm" href="{% url 'account_login' %}">
+                <i class="fas fa-sign-in-alt me-1"></i>Login
+              </a>
+              <a class="btn btn-primary btn-sm" href="{% url 'account_signup' %}">
+                <i class="fas fa-user-plus me-1"></i>Sign Up
+              </a>
+            </div>
+          {% endif %}
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Light/Dark Theme Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const body = document.body;
+    const navbar = document.getElementById('navbar');
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    // Check if elements exist
+    if (!navbar || !themeToggle || !themeIcon) {
+      console.warn('Theme toggle elements not found');
+      return;
+    }
+
+    // Get system theme preference
+    function getSystemTheme() {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    // Apply theme function
+    function applyTheme(theme) {
+      const isDark = theme === 'dark';
+      
+      // Update body classes
+      body.classList.toggle('bg-dark', isDark);
+      body.classList.toggle('text-white', isDark);
+      body.classList.toggle('bg-light', !isDark);
+      body.classList.toggle('text-dark', !isDark);
+      
+      // Update navbar classes
+      navbar.classList.toggle('navbar-dark', isDark);
+      navbar.classList.toggle('bg-dark', isDark);
+      navbar.classList.toggle('navbar-light', !isDark);
+      navbar.classList.toggle('bg-light', !isDark);
+      
+      // Update theme toggle button
+      if (isDark) {
+        themeIcon.className = 'fas fa-sun';
+        themeToggle.setAttribute('title', 'Switch to light theme');
+        themeToggle.setAttribute('aria-label', 'Switch to light theme');
+      } else {
+        themeIcon.className = 'fas fa-moon';
+        themeToggle.setAttribute('title', 'Switch to dark theme');
+        themeToggle.setAttribute('aria-label', 'Switch to dark theme');
+      }
+      
+      // Update Bootstrap theme attribute
+      document.documentElement.setAttribute('data-bs-theme', theme);
+      
+      // Store theme preference (only if localStorage is available)
+      try {
+        localStorage.setItem('theme', theme);
+      } catch (e) {
+        console.warn('localStorage not available for theme storage');
+      }
+    }
+
+    // Toggle theme function
+    window.toggleTheme = function() {
+      let currentTheme;
+      try {
+        currentTheme = localStorage.getItem('theme');
+      } catch (e) {
+        currentTheme = null;
+      }
+      
+      // If no saved theme, use system preference
+      if (!currentTheme) {
+        currentTheme = getSystemTheme();
+      }
+      
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(newTheme);
+    };
+
+    // Initialize theme on page load
+    function initializeTheme() {
+      let savedTheme;
+      try {
+        savedTheme = localStorage.getItem('theme');
+      } catch (e) {
+        savedTheme = null;
+      }
+      
+      // Use saved theme, fallback to system preference, then fallback to dark
+      const theme = savedTheme || getSystemTheme() || 'dark';
+      applyTheme(theme);
+    }
+
+    // Listen for system theme changes
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        // Only auto-switch if user hasn't manually set a preference
+        try {
+          if (!localStorage.getItem('theme')) {
+            applyTheme(e.matches ? 'dark' : 'light');
+          }
+        } catch (err) {
+          // If localStorage isn't available, just follow system preference
+          applyTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+
+    // Initialize theme
+    initializeTheme();
+
+    // Add keyboard support for theme toggle
+    themeToggle.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleTheme();
+      }
+    });
+
+    // Update active nav links
+    function updateActiveNavLinks() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+      
+      navLinks.forEach(link => {
+        const linkPath = link.getAttribute('href');
+        if (linkPath && linkPath === currentPath) {
+          link.classList.add('active');
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.classList.remove('active');
+          link.removeAttribute('aria-current');
+        }
+      });
+    }
+
+    // Initialize active nav links
+    updateActiveNavLinks();
+  });
+</script>
+
+<!-- Additional CSS for better theming -->
+<style>
+  /* Smooth transition for theme changes */
+  body, .navbar {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Improve navbar brand styling */
+  .navbar-brand img {
+    transition: opacity 0.3s ease;
+  }
+
+  .navbar-brand:hover img {
+    opacity: 0.8;
+  }
+
+  /* Better button styling */
+  .btn-group .btn {
+    border-radius: 0.375rem;
+  }
+
+  .btn-group .btn:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .btn-group .btn:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  /* Theme toggle button hover effect */
+  #themeToggle {
+    transition: all 0.3s ease;
+  }
+
+  #themeToggle:hover {
+    transform: scale(1.1);
+  }
+
+  /* Navbar text styling */
+  .navbar-text {
+    font-size: 0.9rem;
+  }
+
+  /* Active nav link styling */
+  .nav-link.active {
+    font-weight: 600;
+    position: relative;
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 1px;
+  }
+
+  /* Responsive improvements */
+  @media (max-width: 991px) {
+    .navbar-nav .nav-item {
+      margin-bottom: 0.25rem;
+    }
+    
+    .btn-group {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    
+    .btn-group .btn {
+      flex: 1;
+    }
+  }
+</style>

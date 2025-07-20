@@ -1,0 +1,25 @@
+{% load static %}
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark" aria-label="Recipe Meal Planner Navbar">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+      <img src="{% static 'planner/img/rmp.png' %}" alt="Logo" width="30" class="d-inline-block align-text-top">
+      Recipe Meal Planner
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbar">
+      <ul class="navbar-nav me-auto mb-2 mb-sm-0">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'account_login' %}">Home</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav mb-2 mb-sm-0">
+        <li class="nav-item dropdown">
+          <a class="btn btn-outline-light m-1" href="{% url 'planner:recipe_list' %}">Back</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
